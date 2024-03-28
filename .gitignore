@@ -1,0 +1,9 @@
+Include/**/*.*
+Include/**/*
+Lib/**/*.*
+Lib/**/*
+Scripts/**/*.*
+Scripts/**/*
+token.json
+pyvenv.cfg
+todo
