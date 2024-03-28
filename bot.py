@@ -27,7 +27,7 @@ logging.basicConfig(
 )
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await context.bot.send_message(chat_id=update.effective_chat.id, text="I'm a bot, please talk to me!")
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="Howdy, I'm your assistant bot. Currently I'm capable of... nothing. You can roll a dice or get your user_id and user_name")
 
 async def about_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Pee-pee poo-poo, imma stoopid bot")
@@ -42,7 +42,7 @@ async def echo(update: Update, context):
 
 async def dice(update: Update, context):
     if len(context.args) == 0 :
-        await context.bot.send_message(chat_id=update.effective_chat.id, text="You forgor to add number")
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="You forgor to add number \n Command example: '''/dice 20'''")
     else:
         dice = int(context.args[0])
         result =  random.randint(1, dice)
@@ -92,3 +92,4 @@ if __name__ == '__main__':
     application.add_handler(kill_handler)
 
     application.run_polling()
+    exit()
