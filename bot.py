@@ -2,7 +2,8 @@ import logging
 import json
 import random
 from telegram import Update , InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, CallbackQueryHandler
+from telegram.ext import ApplicationBuilder, ContextTypes
+from telegram.ext import CommandHandler, CallbackQueryHandler, MessageHandler, filters
 
 with open('rockets.json') as rfp:
     rockets_count = int(json.load(rfp))
@@ -89,11 +90,18 @@ async def keyboard_callback( update:Update, context:ContextTypes.DEFAULT_TYPE):
     if query.data[0:4] == 'Dice':
         reply_text=f'You rolled: {dice_roll(int(query.data[5:]))}'
     else:
-        reply_text='Pee pee poo poo, imma stooopid'
+        reply_text='Pee-pee poo-poo, imma stooopid, tell my creator to fix me ,w,'
     await query.answer(text=reply_text)
 
 
-
+async def whostoopid(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    msg = update.message.text
+    print("Blep")
+    print(update.message.chat.type)
+    if msg == "Who is stoopid":
+        await context.bot.send_message(chat_id=update.effective_chat.id, reply_to_message_id=update.effective_message.id, text="Imma stoopid .w.")
+    else:
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="Noh ^w^")
 
 
 
@@ -108,7 +116,7 @@ if __name__ == '__main__':
     rocket_handler = CommandHandler('rocket', rockets)
     kill_handler = CommandHandler('kys', kill)
    # button_handler = CommandHandler('button_test', dice_select)
-    
+    stoopid_handler = MessageHandler(filters= filters.TEXT & (~filters.COMMAND),callback= whostoopid)
 
     application.add_handler(start_handler)
     application.add_handler(about_handler)
@@ -117,7 +125,7 @@ if __name__ == '__main__':
     application.add_handler(dice_handler)
     application.add_handler(rocket_handler)
     application.add_handler(kill_handler)
-   # application.add_handler(button_handler)
+    application.add_handler(stoopid_handler)
     application.add_handler(CallbackQueryHandler(keyboard_callback))
 
     application.run_polling()
