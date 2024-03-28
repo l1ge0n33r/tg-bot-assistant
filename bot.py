@@ -9,6 +9,8 @@ tokenfp = open('token.json','r')
 token = json.load(tokenfp)
 tokenfp.close()
 rockets_count = int(json.load(rfp))
+rfp.close()
+rfp = open('rockets.json','w')
 
 
 # TODO:
