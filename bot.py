@@ -14,6 +14,7 @@ tokenfp.close()
 
 
 # TODO:
+# Major - rewrite on AioGRAM
 # - add todolist
 # - interface: LLM to specify commands; add questions to specify is commands correct
 # - distribute message to group of people
@@ -77,8 +78,8 @@ async def dice_select( update: Update, context: ContextTypes.DEFAULT_TYPE):
     list_test = ['Dice 20', 'Dice 12', 'Dice 10', 'Dice 6', 'Dice 4']
     button_list =[]
     for each in list_test:
-        button_list.append(InlineKeyboardButton(text=each, callback_data=each))
-    reply_markup=InlineKeyboardMarkup([button_list])
+        button_list.append([InlineKeyboardButton(text=each, callback_data=each)])
+    reply_markup=InlineKeyboardMarkup(button_list)
 
     await context.bot.send_message(text="Choose dice to roll", chat_id=update.effective_chat.id, reply_markup=reply_markup)
 
@@ -88,9 +89,10 @@ async def keyboard_callback( update:Update, context:ContextTypes.DEFAULT_TYPE):
     print(query.data[0:4])
     reply_text= str()
     if query.data[0:4] == 'Dice':
-        reply_text=f'You rolled: {dice_roll(int(query.data[5:]))}'
+        reply_text=f' {query.from_user.username } ,you rolled: {dice_roll(int(query.data[5:]))} on {int(query.data[5:])}'
     else:
         reply_text='Pee-pee poo-poo, imma stooopid, tell my creator to fix me ,w,'
+    await context.bot.send_message(chat_id=update.effective_chat.id, text=reply_text)
     await query.answer(text=reply_text)
 
 
@@ -100,8 +102,8 @@ async def whostoopid(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(update.message.chat.type)
     if msg == "Who is stoopid":
         await context.bot.send_message(chat_id=update.effective_chat.id, reply_to_message_id=update.effective_message.id, text="Imma stoopid .w.")
-    else:
-        await context.bot.send_message(chat_id=update.effective_chat.id, text="Noh ^w^")
+    # else:
+    #     await context.bot.send_message(chat_id=update.effective_chat.id, text="Noh ^w^")
 
 
 
