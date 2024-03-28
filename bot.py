@@ -1,8 +1,8 @@
 import logging
 import json
 import random
-from telegram import Update
-from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
+from telegram import Update , InlineKeyboardMarkup, InlineKeyboardButton
+from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, CallbackQueryHandler
 
 rfp = open('rockets.json','+r')
 tokenfp = open('token.json','r')
@@ -57,7 +57,7 @@ async def kill(update: Update, context: ContextTypes.DEFAULT_TYPE):
         json.dump(rockets_count, rfp)
         await context.bot.send_message(chat_id=update.effective_chat.id, text="Adios B-|")
         rfp.close()
-        exit()
+        await application.stop()
     else:
         await context.bot.send_message(chat_id=update.effective_chat.id, text="How about u?")
 
@@ -66,6 +66,21 @@ async def rockets(update: Update, context: ContextTypes.DEFAULT_TYPE):
     rockets_count= rockets_count + 1
     json.dump(rockets_count, rfp)
     await context.bot.send_message(chat_id=update.effective_chat.id, text="You've sent "+str(rockets_count)+" rockets to Afrika")
+
+async def button_test( update: Update, context: ContextTypes.DEFAULT_TYPE):
+    list_test = ['Button1', 'Button2', 'Button3']
+    button_list =[]
+    for each in list_test:
+        button_list.append(InlineKeyboardButton(text=each, callback_data=each))
+    reply_markup=InlineKeyboardMarkup([button_list])
+
+    await context.bot.send_message(text="Choose button", chat_id=update.effective_chat.id, reply_markup=reply_markup)
+
+async def keyboard_callback( update:Update, context:ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    print('query.data: ', query.data)
+
+    await query.answer(text=f'Selected: {query.data}')
 
 
 
@@ -82,6 +97,8 @@ if __name__ == '__main__':
     dice_handler= CommandHandler('dice', dice)
     rocket_handler = CommandHandler('rocket', rockets)
     kill_handler = CommandHandler('kys', kill)
+    button_handler = CommandHandler('button_test', button_test)
+    
 
     application.add_handler(start_handler)
     application.add_handler(about_handler)
@@ -90,6 +107,7 @@ if __name__ == '__main__':
     application.add_handler(dice_handler)
     application.add_handler(rocket_handler)
     application.add_handler(kill_handler)
+    application.add_handler(button_handler)
+    application.add_handler(CallbackQueryHandler(keyboard_callback))
 
     application.run_polling()
-    exit()
