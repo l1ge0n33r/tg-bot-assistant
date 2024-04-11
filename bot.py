@@ -11,8 +11,6 @@ tokenfp = open('token.json','r')
 token = json.load(tokenfp)
 tokenfp.close()
 
-
-
 # TODO:
 # Major - rewrite on AioGRAM
 # - add todolist
@@ -29,9 +27,12 @@ logging.basicConfig(
     level=logging.INFO
 )
 
-def dice_roll(number:int):
-    return random.randint(1,number)
-
+def dice_roll(number:int, amount:int =None):
+    if amount is None:
+        return [random.randint(1,number)]
+    for i in range(1, amount):
+        return [random.randint(1,number) for i in range(amount)]
+#------------#
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Howdy, I'm your assistant bot. Currently I'm capable of... nothing. You can roll a dice or get your user_id and user_name")
@@ -42,6 +43,8 @@ async def about_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def whoami(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text=str(update.message.from_user.first_name)+" "+str(update.message.from_user.id))
     await context.bot.send_message(chat_id=update.effective_chat.id, text=str(update.effective_chat))
+
+#------------#
 
 async def echo(update: Update, context):
     user_says = " ".join(context.args)
@@ -60,10 +63,11 @@ async def todo_show(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def kill(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.from_user.id == 737928817:
-        
-        json.dump(rockets_count, rfp)
+        global application
+        # json.dump(rockets_count, rfp)
         await context.bot.send_message(chat_id=update.effective_chat.id, text="Adios B-|")
-        rfp.close()
+        # rfp.close()
+        application.stop_running()
         await application.stop()
     else:
         await context.bot.send_message(chat_id=update.effective_chat.id, text="How about u?")
@@ -76,6 +80,23 @@ async def rockets(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def dice_select( update: Update, context: ContextTypes.DEFAULT_TYPE):
     list_test = ['Dice 20', 'Dice 12', 'Dice 10', 'Dice 6', 'Dice 4']
+    if len(context.args) != 0:
+        print(context.args)
+        if context.args[0].isdigit():
+            dice_result = dice_roll(int(context.args[0]), (int(context.args[1]) if (len(context.args) == 2) else None))
+            print(str(dice_result))
+            drs = ' '.join(str(d) for d in dice_result)
+            avg = 0
+            sum = 0
+            for d in dice_result:
+                sum+=d
+                avg+=d
+            avg = avg/dice_result.__len__()
+            await context.bot.send_message(chat_id=update.effective_chat.id , text=f"You rolled {drs} on {context.args[0]}\nAvarage: {avg}\nSum: {sum}", reply_to_message_id=update.effective_message.id)
+            return
+        else:
+            await context.bot.send_message(chat_id=update.effective_chat.id, text="You shall send number, not somewhat junk гwг \nCommand example: '''/dice 20'''")
+            return
     button_list =[]
     for each in list_test:
         button_list.append([InlineKeyboardButton(text=each, callback_data=each)])
@@ -89,22 +110,23 @@ async def keyboard_callback( update:Update, context:ContextTypes.DEFAULT_TYPE):
     print(query.data[0:4])
     reply_text= str()
     if query.data[0:4] == 'Dice':
-        reply_text=f' {query.from_user.username } ,you rolled: {dice_roll(int(query.data[5:]))} on {int(query.data[5:])}'
+        dr = dice_roll(int(query.data[5:]))
+        drs = ' '.join(str(d) for d in dr)
+        reply_text=f'@{query.from_user.username }, you rolled: {drs} on {int(query.data[5:])}'
     else:
         reply_text='Pee-pee poo-poo, imma stooopid, tell my creator to fix me ,w,'
     await context.bot.send_message(chat_id=update.effective_chat.id, text=reply_text)
     await query.answer(text=reply_text)
-
 
 async def whostoopid(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.message.text
     print("Blep")
     print(update.message.chat.type)
     if msg == "Who is stoopid":
-        await context.bot.send_message(chat_id=update.effective_chat.id, reply_to_message_id=update.effective_message.id, text="Imma stoopid .w.")
-    # else:
-    #     await context.bot.send_message(chat_id=update.effective_chat.id, text="Noh ^w^")
-
+        if update.message.from_user.id == 737928817:
+            await context.bot.send_message(chat_id=update.effective_chat.id, reply_to_message_id=update.effective_message.id, text="Imma stoopid .w.")
+        else:
+            await context.bot.send_message(chat_id=update.effective_chat.id, reply_to_message_id=update.effective_message.id, text="YOU BOZO ^w^")
 
 
 if __name__ == '__main__':
@@ -118,6 +140,7 @@ if __name__ == '__main__':
     rocket_handler = CommandHandler('rocket', rockets)
     kill_handler = CommandHandler('kys', kill)
    # button_handler = CommandHandler('button_test', dice_select)
+    
     stoopid_handler = MessageHandler(filters= filters.TEXT & (~filters.COMMAND),callback= whostoopid)
 
     application.add_handler(start_handler)
