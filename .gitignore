@@ -5,6 +5,7 @@ Lib/**/*
 Scripts/**/*.*
 Scripts/**/*
 .vscode/**/*.*
+chats.json/
 token.json
 pyvenv.cfg
 todo
