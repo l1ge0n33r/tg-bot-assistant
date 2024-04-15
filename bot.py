@@ -5,11 +5,16 @@ from telegram import Update , InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ApplicationBuilder, ContextTypes
 from telegram.ext import CommandHandler, CallbackQueryHandler, MessageHandler, filters
 
+
+active_chat_list = []
+
 with open('rockets.json') as rfp:
     rockets_count = int(json.load(rfp))
 tokenfp = open('token.json','r')
 token = json.load(tokenfp)
 tokenfp.close()
+with open('chats.json', 'r+') as chatfp:
+    active_chat_list = json.load(chatfp)
 
 # TODO:
 # Major - rewrite on AioGRAM
@@ -36,6 +41,9 @@ def dice_roll(number:int, amount:int =None):
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Howdy, I'm your assistant bot. Currently I'm capable of... nothing. You can roll a dice or get your user_id and user_name")
+    active_chat_list.append(update.effective_chat.id)
+    with open('chats.json', 'r+') as chatfp:
+        json.dump(active_chat_list,chatfp)
 
 async def about_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Pee-pee poo-poo, imma stoopid bot")
@@ -43,6 +51,14 @@ async def about_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def whoami(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text=str(update.message.from_user.first_name)+" "+str(update.message.from_user.id))
     await context.bot.send_message(chat_id=update.effective_chat.id, text=str(update.effective_chat))
+
+async def sysmsg(update:Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != 737928817:
+        return
+    msg = " ".join(context.args)
+    for c in active_chat_list:
+        print(msg)
+        await context.bot.sendMessage(chat_id=c, text= msg)
 
 #------------#
 
@@ -129,6 +145,8 @@ async def whostoopid(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.send_message(chat_id=update.effective_chat.id, reply_to_message_id=update.effective_message.id, text="YOU BOZO ^w^")
 
 
+
+
 if __name__ == '__main__':
     application = ApplicationBuilder().token(token).build()
     
@@ -139,6 +157,7 @@ if __name__ == '__main__':
     dice_handler= CommandHandler('dice', dice_select)
     rocket_handler = CommandHandler('rocket', rockets)
     kill_handler = CommandHandler('kys', kill)
+    sysmsg_handler = CommandHandler('sysmsg', sysmsg)
    # button_handler = CommandHandler('button_test', dice_select)
     
     stoopid_handler = MessageHandler(filters= filters.TEXT & (~filters.COMMAND),callback= whostoopid)
@@ -152,5 +171,7 @@ if __name__ == '__main__':
     application.add_handler(kill_handler)
     application.add_handler(stoopid_handler)
     application.add_handler(CallbackQueryHandler(keyboard_callback))
+    application.add_handler(sysmsg_handler)
+
 
     application.run_polling()
